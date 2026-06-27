@@ -2,7 +2,10 @@ package com.yourorg.elasticcommon.index;
 
 public class IndexNameStrategy {
 
-    public String forCustomer(String customerId) {
-        return "customer_data_" + customerId + "_v1";
+    public static final String INDEX_SEPARATOR  = "_";
+    public static final String INDEX_VERSION    = "v1";
+
+    public String buildIndexName(String prefix, String entityId) {
+        return prefix + INDEX_SEPARATOR + entityId + INDEX_SEPARATOR + INDEX_VERSION;
     }
 }

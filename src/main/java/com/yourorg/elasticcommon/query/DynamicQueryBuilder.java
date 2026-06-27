@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.yourorg.elasticcommon.exception.EsOperationException;
 import com.yourorg.elasticcommon.model.FieldDefinition;
 import com.yourorg.elasticcommon.model.IndexTemplate;
 import com.yourorg.elasticcommon.model.SearchCriteria;
@@ -62,7 +63,7 @@ public class DynamicQueryBuilder {
                 return Query.of(q -> q.withJson(reader));
             }
         } catch (Exception e) {
-            throw new RuntimeException("Failed to build dynamic query from index template", e);
+            throw new EsOperationException("Failed to build dynamic query from index template", e);
         }
     }
 

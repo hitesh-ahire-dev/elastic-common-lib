@@ -12,8 +12,10 @@ import java.nio.charset.StandardCharsets;
 
 public class EsTemplateInitializer {
 
-    private static final Log log = LogFactory.getLog(EsTemplateInitializer.class);
-    private static final String TEMPLATE_PREFIX = "es-templates/";
+    private static final Log    log                   = LogFactory.getLog(EsTemplateInitializer.class);
+    private static final String TEMPLATE_PREFIX        = "es-templates/";
+    private static final String TEMPLATE_SCAN_PATTERN  = "classpath*:es-templates/**/*.json";
+    private static final String SCRIPT_LANG            = "mustache";
 
     private final ElasticsearchClient elasticsearchClient;
 
@@ -25,7 +27,7 @@ public class EsTemplateInitializer {
     public void registerTemplates() {
         try {
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-            Resource[] resources = resolver.getResources("classpath*:es-templates/**/*.json");
+            Resource[] resources = resolver.getResources(TEMPLATE_SCAN_PATTERN);
 
             for (Resource resource : resources) {
                 String url = resource.getURL().toString();
@@ -39,7 +41,7 @@ public class EsTemplateInitializer {
                 elasticsearchClient.putScript(r -> r
                         .id(templateId)
                         .script(s -> s
-                                .lang("mustache")
+                                .lang(SCRIPT_LANG)
                                 .source(templateBody)
                         )
                 );

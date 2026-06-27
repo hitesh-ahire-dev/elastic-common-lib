@@ -7,6 +7,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class TemplateResolver {
 
+    private static final String TEMPLATE_BASE_PATH = "es-templates/";
+    private static final String TEMPLATE_EXTENSION  = ".json";
+
     private final ConcurrentHashMap<String, String> templateCache = new ConcurrentHashMap<>();
 
     public String resolveTemplate(String templateKey) {
@@ -14,7 +17,7 @@ public class TemplateResolver {
     }
 
     private String loadTemplate(String templateKey) {
-        String resourcePath = "es-templates/" + templateKey + ".json";
+        String resourcePath = TEMPLATE_BASE_PATH + templateKey + TEMPLATE_EXTENSION;
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
             if (inputStream == null) {
                 throw new EsTemplateException("Template not found: " + resourcePath);

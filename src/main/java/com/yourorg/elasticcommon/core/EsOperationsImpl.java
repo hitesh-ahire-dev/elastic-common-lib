@@ -23,6 +23,10 @@ import java.util.Optional;
 
 public class EsOperationsImpl implements EsOperations {
 
+    private static final int DEFAULT_FROM     = 0;
+    private static final int DEFAULT_MAX_SIZE = 10_000;
+    private static final int COUNT_SIZE       = 0;
+
     private final ElasticsearchClient elasticsearchClient;
     private final RetryExecutor retryExecutor;
     private final DynamicQueryBuilder dynamicQueryBuilder;
@@ -122,8 +126,8 @@ public class EsOperationsImpl implements EsOperations {
             try {
                 String templateId = EsTemplateInitializer.toEsId(templateKey);
                 Map<String, JsonData> params = toJsonParams(request.getParams());
-                params.put("from", JsonData.of(0));
-                params.put("size", JsonData.of(10000));
+                params.put("from", JsonData.of(DEFAULT_FROM));
+                params.put("size", JsonData.of(DEFAULT_MAX_SIZE));
 
                 SearchTemplateResponse<T> response = elasticsearchClient.searchTemplate(r -> r
                         .index(request.getIndexAlias())
@@ -170,8 +174,8 @@ public class EsOperationsImpl implements EsOperations {
             try {
                 String templateId = EsTemplateInitializer.toEsId(templateKey);
                 Map<String, JsonData> params = toJsonParams(request.getParams());
-                params.put("from", JsonData.of(0));
-                params.put("size", JsonData.of(0));
+                params.put("from", JsonData.of(DEFAULT_FROM));
+                params.put("size", JsonData.of(COUNT_SIZE));
 
                 SearchTemplateResponse<Object> response = elasticsearchClient.searchTemplate(r -> r
                         .index(request.getIndexAlias())

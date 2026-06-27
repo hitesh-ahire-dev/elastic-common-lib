@@ -7,13 +7,16 @@ import java.util.function.Supplier;
 
 public class RetryExecutor {
 
+    private static final String RETRY_NAME         = "esRetry";
+    private static final double BACKOFF_MULTIPLIER = 2.0;
+
     private final Retry retry;
 
     public RetryExecutor(EsProperties esProperties) {
-        this.retry = Retry.of("esRetry", RetryConfig.custom()
+        this.retry = Retry.of(RETRY_NAME, RetryConfig.custom()
                 .maxAttempts(esProperties.getRetry().getMaxAttempts())
                 .intervalFunction(io.github.resilience4j.core.IntervalFunction
-                        .ofExponentialBackoff(esProperties.getRetry().getBackoffMs(), 2))
+                        .ofExponentialBackoff(esProperties.getRetry().getBackoffMs(), BACKOFF_MULTIPLIER))
                 .build());
     }
 
