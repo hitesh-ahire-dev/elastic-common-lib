@@ -1,0 +1,12 @@
+{
+  "from": {{from}},
+  "size": {{size}},
+  "query": {
+    "bool": {
+      "must": [
+        { "term": { "customerId": "{{customerId}}" } },
+        { "term": { "status": "{{status}}" } }
+      ]
+    }
+  }
+}

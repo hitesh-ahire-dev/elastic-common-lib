@@ -1,0 +1,12 @@
+{
+  "from": {{from}},
+  "size": {{size}},
+  "query": {
+    "bool": {
+      "must": [
+        { "term": { "customerId": "{{customerId}}" } },
+        { "multi_match": { "query": "{{queryText}}", "fields": ["name", "email"] } }
+      ]
+    }
+  }
+}
