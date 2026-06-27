@@ -4,9 +4,10 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.yourorg.elasticcommon.exception.EsOperationException;
 import com.yourorg.elasticcommon.model.MappingFileIndexTemplate;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.StringReader;
 import java.util.Set;
@@ -26,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class EsIndexManager {
 
-    private static final Log log = LogFactory.getLog(EsIndexManager.class);
+    private static final Logger log = LoggerFactory.getLogger(EsIndexManager.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final ElasticsearchClient client;
@@ -42,11 +43,11 @@ public class EsIndexManager {
             boolean exists = client.indices().exists(r -> r.index(indexAlias)).value();
             if (!exists) {
                 client.indices().create(r -> r.index(indexAlias));
-                log.info("Created index: " + indexAlias);
+                log.info("Created index: {}", indexAlias);
             }
             knownIndices.add(indexAlias);
         } catch (Exception e) {
-            log.warn("Could not ensure index '" + indexAlias + "': " + e.getMessage());
+            log.warn("Could not ensure index '{}': {}", indexAlias, e.getMessage());
         }
     }
 
@@ -62,11 +63,11 @@ public class EsIndexManager {
                             .withJson(reader));
                     client.indices().create(request);
                 }
-                log.info("Created index '" + indexAlias + "' using template '" + template.getTemplateName() + "'");
+                log.info("Created index '{}' using template '{}'", indexAlias, template.getTemplateName());
             }
             knownIndices.add(indexAlias);
         } catch (Exception e) {
-            log.warn("Could not ensure index '" + indexAlias + "' with mapping: " + e.getMessage());
+            log.warn("Could not ensure index '{}' with mapping: {}", indexAlias, e.getMessage());
         }
     }
 
@@ -83,7 +84,7 @@ public class EsIndexManager {
             }
             return MAPPER.writeValueAsString(body);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to build create-index body", e);
+            throw new EsOperationException("Failed to build create-index body for template: " + template.getTemplateName(), e);
         }
     }
 }

@@ -5,6 +5,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.SortOptions;
 import com.yourorg.elasticcommon.model.PaginationRequest;
 import com.yourorg.elasticcommon.model.SearchRequest;
+import com.yourorg.elasticcommon.template.EsTemplateException;
 import org.apache.commons.text.StringSubstitutor;
 import java.io.StringReader;
 import java.util.List;
@@ -20,7 +21,7 @@ public class QueryBuilder {
         try {
             return Query.of(q -> q.withJson(new StringReader(resolved)));
         } catch (Exception e) {
-            throw new RuntimeException("Failed to parse query JSON: " + resolved, e);
+            throw new EsTemplateException("Failed to parse resolved query JSON", e);
         }
     }
 

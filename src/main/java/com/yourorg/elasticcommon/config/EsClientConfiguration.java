@@ -13,6 +13,7 @@ import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.ssl.SSLContextBuilder;
 import com.yourorg.elasticcommon.core.EsOperations;
@@ -20,17 +21,14 @@ import com.yourorg.elasticcommon.core.EsOperationsImpl;
 import com.yourorg.elasticcommon.index.EsIndexManager;
 import com.yourorg.elasticcommon.index.IndexNameStrategy;
 import com.yourorg.elasticcommon.query.DynamicQueryBuilder;
-import com.yourorg.elasticcommon.query.QueryBuilder;
 import com.yourorg.elasticcommon.retry.RetryExecutor;
 import com.yourorg.elasticcommon.template.EsTemplateInitializer;
-import com.yourorg.elasticcommon.template.TemplateResolver;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.net.ssl.SSLContext;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.security.KeyStore;
 import java.util.List;
 
@@ -46,37 +44,32 @@ public class EsClientConfiguration {
 
         RestClientBuilder builder = RestClient.builder(hosts.toArray(new HttpHost[0]));
 
-        if (esProperties.getUsername() != null && !esProperties.getUsername().isBlank()) {
-            CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        boolean hasCredentials = esProperties.getUsername() != null && !esProperties.getUsername().isBlank();
+        CredentialsProvider credentialsProvider = null;
+        if (hasCredentials) {
+            credentialsProvider = new BasicCredentialsProvider();
             credentialsProvider.setCredentials(
                     AuthScope.ANY,
                     new UsernamePasswordCredentials(esProperties.getUsername(), esProperties.getPassword())
             );
-            builder.setHttpClientConfigCallback(httpClientBuilder -> {
-                httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
-                httpClientBuilder.setDefaultRequestConfig(org.apache.http.client.config.RequestConfig.custom()
-                        .setConnectTimeout(esProperties.getConnectTimeoutMs())
-                        .setSocketTimeout(esProperties.getSocketTimeoutMs())
-                        .build());
-                return httpClientBuilder;
-            });
-        } else {
-            builder.setHttpClientConfigCallback(httpClientBuilder -> {
-                httpClientBuilder.setDefaultRequestConfig(org.apache.http.client.config.RequestConfig.custom()
-                        .setConnectTimeout(esProperties.getConnectTimeoutMs())
-                        .setSocketTimeout(esProperties.getSocketTimeoutMs())
-                        .build());
-                return httpClientBuilder;
-            });
         }
 
-        if (esProperties.isSslEnabled()) {
-            SSLContext sslContext = buildSSLContext(esProperties);
-            builder.setHttpClientConfigCallback(httpClientBuilder -> {
+        SSLContext sslContext = esProperties.isSslEnabled() ? buildSSLContext(esProperties) : null;
+
+        final CredentialsProvider finalCredentialsProvider = credentialsProvider;
+        builder.setHttpClientConfigCallback(httpClientBuilder -> {
+            if (finalCredentialsProvider != null) {
+                httpClientBuilder.setDefaultCredentialsProvider(finalCredentialsProvider);
+            }
+            httpClientBuilder.setDefaultRequestConfig(RequestConfig.custom()
+                    .setConnectTimeout(esProperties.getConnectTimeoutMs())
+                    .setSocketTimeout(esProperties.getSocketTimeoutMs())
+                    .build());
+            if (sslContext != null) {
                 httpClientBuilder.setSSLContext(sslContext);
-                return httpClientBuilder;
-            });
-        }
+            }
+            return httpClientBuilder;
+        });
 
         RestClient restClient = builder.build();
 
@@ -100,16 +93,6 @@ public class EsClientConfiguration {
     @Bean
     public DynamicQueryBuilder dynamicQueryBuilder() {
         return new DynamicQueryBuilder();
-    }
-
-    @Bean
-    public QueryBuilder queryBuilder() {
-        return new QueryBuilder();
-    }
-
-    @Bean
-    public TemplateResolver templateResolver() {
-        return new TemplateResolver();
     }
 
     @Bean

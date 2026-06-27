@@ -2,6 +2,7 @@ package com.yourorg.elasticcommon.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yourorg.elasticcommon.exception.EsOperationException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -61,7 +62,7 @@ public abstract class MappingFileIndexTemplate implements IndexTemplate {
             this.fieldMap        = this.fields.stream()
                     .collect(Collectors.toUnmodifiableMap(FieldDefinition::getName, f -> f));
         } catch (IOException e) {
-            throw new RuntimeException("Failed to parse mapping file: " + mappingResourcePath, e);
+            throw new EsOperationException("Failed to parse mapping file: " + mappingResourcePath, e);
         }
     }
 

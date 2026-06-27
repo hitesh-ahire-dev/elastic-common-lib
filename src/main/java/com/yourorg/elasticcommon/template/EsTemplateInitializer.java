@@ -1,8 +1,8 @@
 package com.yourorg.elasticcommon.template;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.io.Resource;
@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 
 public class EsTemplateInitializer {
 
-    private static final Log    log                   = LogFactory.getLog(EsTemplateInitializer.class);
+    private static final Logger log = LoggerFactory.getLogger(EsTemplateInitializer.class);
     private static final String TEMPLATE_PREFIX        = "es-templates/";
     private static final String TEMPLATE_SCAN_PATTERN  = "classpath*:es-templates/**/*.json";
     private static final String SCRIPT_LANG            = "mustache";
@@ -45,10 +45,10 @@ public class EsTemplateInitializer {
                                 .source(templateBody)
                         )
                 );
-                log.info("Registered ES stored template: '" + templateKey + "' as id: '" + templateId + "'");
+                log.info("Registered ES stored template: '{}' as id: '{}'", templateKey, templateId);
             }
         } catch (Exception e) {
-            log.warn("Failed to register ES search templates: " + e.getMessage() + ". Ensure Elasticsearch is running.");
+            log.warn("Failed to register ES search templates: {}. Ensure Elasticsearch is running.", e.getMessage());
         }
     }
 

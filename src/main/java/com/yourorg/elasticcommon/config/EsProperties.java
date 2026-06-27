@@ -1,6 +1,7 @@
 package com.yourorg.elasticcommon.config;
 
 import lombok.Data;
+import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.List;
@@ -14,9 +15,11 @@ public class EsProperties {
 
     private List<String> hosts;
     private String username;
+    @ToString.Exclude
     private String password;
     private boolean sslEnabled = false;
     private String truststorePath;
+    @ToString.Exclude
     private String truststorePassword;
     private int connectTimeoutMs = DEFAULT_CONNECT_TIMEOUT_MS;
     private int socketTimeoutMs  = DEFAULT_SOCKET_TIMEOUT_MS;

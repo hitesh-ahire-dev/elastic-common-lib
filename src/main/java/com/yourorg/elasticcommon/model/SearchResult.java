@@ -1,5 +1,6 @@
 package com.yourorg.elasticcommon.model;
 
+import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.SearchTemplateResponse;
 import co.elastic.clients.elasticsearch.core.search.HitsMetadata;
@@ -10,7 +11,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
 @Builder
@@ -32,15 +32,15 @@ public class SearchResult<T> {
     private static <T> SearchResult<T> fromHits(HitsMetadata<T> hits) {
         List<T> data = hits.hits().stream()
                 .map(Hit::source)
-                .collect(Collectors.toList());
+                .toList();
 
         List<String> searchAfter = null;
         if (!hits.hits().isEmpty()) {
-            var lastHit = hits.hits().get(hits.hits().size() - 1);
+            Hit<T> lastHit = hits.hits().get(hits.hits().size() - 1);
             if (lastHit.sort() != null && !lastHit.sort().isEmpty()) {
                 searchAfter = lastHit.sort().stream()
-                        .map(fv -> fv._kind().name().equals("StringValue") ? fv.stringValue() : String.valueOf(fv))
-                        .collect(Collectors.toList());
+                        .map(SearchResult::fieldValueToString)
+                        .toList();
             }
         }
 
@@ -49,5 +49,15 @@ public class SearchResult<T> {
                 .totalCount(hits.total() != null ? hits.total().value() : 0)
                 .searchAfter(searchAfter)
                 .build();
+    }
+
+    private static String fieldValueToString(FieldValue fv) {
+        return switch (fv._kind()) {
+            case String  -> fv.stringValue();
+            case Long    -> String.valueOf(fv.longValue());
+            case Double  -> String.valueOf(fv.doubleValue());
+            case Boolean -> String.valueOf(fv.booleanValue());
+            default      -> fv.toString();
+        };
     }
 }

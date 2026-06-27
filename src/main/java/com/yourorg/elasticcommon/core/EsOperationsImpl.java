@@ -14,7 +14,6 @@ import com.yourorg.elasticcommon.index.EsIndexManager;
 import com.yourorg.elasticcommon.model.MappingFileIndexTemplate;
 import com.yourorg.elasticcommon.query.DynamicQueryBuilder;
 import com.yourorg.elasticcommon.retry.RetryExecutor;
-import com.yourorg.elasticcommon.template.EsTemplateInitializer;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -124,7 +123,7 @@ public class EsOperationsImpl implements EsOperations {
         esIndexManager.ensureIndex(request.getIndexAlias());
         return retryExecutor.execute(() -> {
             try {
-                String templateId = EsTemplateInitializer.toEsId(templateKey);
+                String templateId = templateKey.replace("/", "-");
                 Map<String, JsonData> params = toJsonParams(request.getParams());
                 params.put("from", JsonData.of(DEFAULT_FROM));
                 params.put("size", JsonData.of(DEFAULT_MAX_SIZE));
@@ -148,7 +147,7 @@ public class EsOperationsImpl implements EsOperations {
         esIndexManager.ensureIndex(request.getIndexAlias());
         return retryExecutor.execute(() -> {
             try {
-                String templateId = EsTemplateInitializer.toEsId(templateKey);
+                String templateId = templateKey.replace("/", "-");
                 Map<String, JsonData> params = toJsonParams(request.getParams());
                 params.put("from", JsonData.of(request.getFrom()));
                 params.put("size", JsonData.of(request.getSize()));
@@ -172,7 +171,7 @@ public class EsOperationsImpl implements EsOperations {
         esIndexManager.ensureIndex(request.getIndexAlias());
         return retryExecutor.execute(() -> {
             try {
-                String templateId = EsTemplateInitializer.toEsId(templateKey);
+                String templateId = templateKey.replace("/", "-");
                 Map<String, JsonData> params = toJsonParams(request.getParams());
                 params.put("from", JsonData.of(DEFAULT_FROM));
                 params.put("size", JsonData.of(COUNT_SIZE));

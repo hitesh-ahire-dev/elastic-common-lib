@@ -1,11 +1,8 @@
 package com.yourorg.elasticcommon.template;
 
-import org.springframework.stereotype.Component;
-
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Component
 public class TemplateRegistry {
 
     private final ConcurrentHashMap<String, String> registeredTemplates = new ConcurrentHashMap<>();
